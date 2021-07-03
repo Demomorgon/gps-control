@@ -19,6 +19,8 @@ class Firebase_db {
         .doc(id)
         .collection('ubicacion')
         .where('dia', isEqualTo: dateTime.day.toString())
+        .where('mes', isEqualTo: dateTime.month.toString())
+        .where('anio', isEqualTo: dateTime.year.toString())
         .snapshots();
   }
 

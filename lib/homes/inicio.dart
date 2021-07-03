@@ -16,6 +16,7 @@ class _InicioState extends State<Inicio> {
   Firebase_db firebase_db = Firebase_db();
   bool sw = true;
   bool swubicacion = true;
+  DateTime selectedDate = DateTime.now();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,12 +82,18 @@ class _InicioState extends State<Inicio> {
   getbody() {
     return Column(
       children: [
-        SizedBox(),
+        swubicacion
+            ? SizedBox()
+            : ElevatedButton(
+                onPressed: () {
+                  _selectDate(context);
+                },
+                child: Text('Fecha')),
         Expanded(
             child: StreamBuilder<QuerySnapshot>(
           stream: swubicacion
               ? firebase_db.ubicacion(id: '123456')
-              : firebase_db.camino(id: '123456', dateTime: now),
+              : firebase_db.camino(id: '123456', dateTime: selectedDate),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> data) {
             if (data.hasData) {
               return swubicacion
@@ -140,7 +147,7 @@ class _InicioState extends State<Inicio> {
     return GoogleMap(
       mapType: sw ? MapType.hybrid : MapType.normal,
       initialCameraPosition: CameraPosition(
-        target: ho.first['latlog'],
+        target: ho.last['latlog'],
         zoom: 13,
       ),
       markers: _createMarkersCamino(ho.first['latlog'], ho.last['latlog']),
@@ -165,7 +172,23 @@ class _InicioState extends State<Inicio> {
         markerId: MarkerId('ubicacion inicial'),
         position: ubicacion,
         icon: BitmapDescriptor.defaultMarker));
-    tmp.add(Marker(markerId: MarkerId('ubicaion final'), position: latLng));
+    tmp.add(Marker(
+      markerId: MarkerId('ubicaion final'),
+      position: latLng,
+      icon: BitmapDescriptor.defaultMarker,
+    ));
     return tmp;
+  }
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2015, 8),
+        lastDate: DateTime(2101));
+    if (picked != null && picked != selectedDate)
+      setState(() {
+        selectedDate = picked;
+      });
   }
 }
